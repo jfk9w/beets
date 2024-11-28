@@ -860,6 +860,18 @@ class Item(LibModel):
         except UnreadableFileError as exc:
             raise ReadError(path, exc)
 
+        # Hack genres to write multiple values.
+        genres = item_tags.get("genres")
+        if genres is None:
+            genres = [item_tags.get("genre")]
+        if genres is not None:
+            item_tags["genres"] = [
+                g
+                for gs in (map(lambda x: x.strip(), re.split(",|;|\\/", g)) for g in genres)
+                for g in gs
+                if len(g) > 0
+            ]
+
         # Write the tags to the file.
         mediafile.update(item_tags)
         try:
